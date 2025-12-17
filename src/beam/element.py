@@ -34,24 +34,30 @@ class Element:
         Stress / modulus → kN/cm²
     """
 
-    def __init__(self, I, E, A, start, end):
+    def __init__(self):
         
-        self.I = I
-        self.E = E
-        self.A = A
-        self.start = start
-        self.end = end
-        self.L = end - start
+        sp.init_printing()
         
-    def create_symbols():
-        I, E, L, A, theta = sp.symbols('I', 'E', 'L', 'A', 'theta')
+        # self.I = I
+        # self.E = E
+        # self.A = A
+        # self.start = start
+        # self.end = end
+        # self.L = end - start
+        
+        I, E, A, L, theta, c, s = self.create_symbols()
+        ke_ = self.ke_(E, A, I, L)
+        T = self.T(c,s)
+        self.Ke = self.Ke(T, ke_)
+        print(self.Ke)
+        
+    def create_symbols(self):
+        I, E, L, A, theta = sp.symbols(['I', 'E', 'L', 'A', 'theta'])
         c = sp.cos(theta)
         s = sp.sin(theta)
         return I, E, L, A, theta, c, s
-     
-     
-    
-    def ke_(E, A, I, L):
+  
+    def ke_(self, E, A, I, L):
         """
         Computes the local stiffness matrix of a beam element
         based on Euler–Bernoulli beam theory. The element has 6 degrees of freedom.
@@ -82,3 +88,19 @@ class Element:
         ])
         return ke_
     
+    def T(self, c,s):
+        T = sp.Matrix([
+            [c, -s, 0, 0, 0, 0],
+            [s, c, 0, 0, 0, 0],
+            [0, 0, 1, 0, 0, 0],
+            [0, 0, 0, c, -s, 0],
+            [0, 0, 0, s, c, 0],
+            [0, 0, 0, 0, 0, 1]  
+        ])
+        return T
+    
+    def Ke(self, T, ke_):
+        return T.T * ke_ * T
+    
+
+ele = Element()
