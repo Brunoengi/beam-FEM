@@ -43,16 +43,42 @@ class Element:
         self.end = end
         self.L = end - start
         
-        def create_symbols():
-            I, E, L, A, theta = sp.symbols('I', 'E', 'L', 'A', 'theta')
-            return I, E, L, A, theta
-        
-        def ke_(E, A, I, L):
-            sp.Matrix([
-                [E * A / L, 0, 0, -E*A/L, 0, 0],
-                [0, 12 *E * I / L ** 3, 6 * E * I / L ** 2, 0, -12 * E * I / L ** 3, 6 * E * I / L ** 2],
-                [0, 6 * E * I / L ** 2, 4 * E * I / L, 0, -6 * E * I / L ** 2, 2 * E * I / L],
-                [-E * A / L, 0, 0, E * A / L, 0, 0],
-                [0, -12 * E * I / L ** 3, -6 * E * I / L ** 2, 0, 12 * E * I / L ** 3, -6 * E * I / L ** 2],
-                [0, 6 * E * I / L ** 2, 2 * E * I / L, 0, -6 * E * I / L ** 2, 4 * E * I / L]
-            ])
+    def create_symbols():
+        I, E, L, A, theta = sp.symbols('I', 'E', 'L', 'A', 'theta')
+        c = sp.cos(theta)
+        s = sp.sin(theta)
+        return I, E, L, A, theta, c, s
+     
+     
+    
+    def ke_(E, A, I, L):
+        """
+        Computes the local stiffness matrix of a beam element
+        based on Euler–Bernoulli beam theory. The element has 6 degrees of freedom.
+
+        Parameters
+        ----------
+        E : float
+            Young's modulus of the material.
+        A : float
+            Cross-sectional area.
+        I : float
+            Second moment of area.
+        L : float
+            Element length.
+
+        Returns
+        -------
+        ke : sympy.Matrix
+            Local stiffness matrix (6x6) in the element coordinate system.
+        """
+        ke_ = sp.Matrix([
+            [E * A / L, 0, 0, -E*A/L, 0, 0],
+            [0, 12 *E * I / L ** 3, 6 * E * I / L ** 2, 0, -12 * E * I / L ** 3, 6 * E * I / L ** 2],
+            [0, 6 * E * I / L ** 2, 4 * E * I / L, 0, -6 * E * I / L ** 2, 2 * E * I / L],
+            [-E * A / L, 0, 0, E * A / L, 0, 0],
+            [0, -12 * E * I / L ** 3, -6 * E * I / L ** 2, 0, 12 * E * I / L ** 3, -6 * E * I / L ** 2],
+            [0, 6 * E * I / L ** 2, 2 * E * I / L, 0, -6 * E * I / L ** 2, 4 * E * I / L]
+        ])
+        return ke_
+    
