@@ -1,3 +1,5 @@
+import sympy as sp
+
 class Element:
     """
     Beam element for structural analysis using the Finite Element Method (FEM).
@@ -30,8 +32,6 @@ class Element:
         Area → cm²  
         Second moment of area → cm⁴  
         Stress / modulus → kN/cm²
-    - No unit conversion is performed internally.
-    - The element formulation assumes **Euler–Bernoulli beam theory**.
     """
 
     def __init__(self, I, E, A, start, end):
@@ -41,3 +41,18 @@ class Element:
         self.A = A
         self.start = start
         self.end = end
+        self.L = end - start
+        
+        def create_symbols():
+            I, E, L, A, theta = sp.symbols('I', 'E', 'L', 'A', 'theta')
+            return I, E, L, A, theta
+        
+        def ke_(E, A, I, L):
+            sp.Matrix([
+                [E * A / L, 0, 0, -E*A/L, 0, 0],
+                [0, 12 *E * I / L ** 3, 6 * E * I / L ** 2, 0, -12 * E * I / L ** 3, 6 * E * I / L ** 2],
+                [0, 6 * E * I / L ** 2, 4 * E * I / L, 0, -6 * E * I / L ** 2, 2 * E * I / L],
+                [-E * A / L, 0, 0, E * A / L, 0, 0],
+                [0, -12 * E * I / L ** 3, -6 * E * I / L ** 2, 0, 12 * E * I / L ** 3, -6 * E * I / L ** 2],
+                [0, 6 * E * I / L ** 2, 2 * E * I / L, 0, -6 * E * I / L ** 2, 4 * E * I / L]
+            ])
