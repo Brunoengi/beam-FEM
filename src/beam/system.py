@@ -1,5 +1,5 @@
 from typing import List
-from element import Element
+from .element import Element
 import sympy as sp
 
 class System:
