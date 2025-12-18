@@ -37,7 +37,7 @@ class Element:
         Stress / modulus → kN/cm²
     """
 
-    def __init__(self, I_, E_, A_, start, end, q1, q2, q3, q4, q5, q6, theta_=0.0):
+    def __init__(self, I_, E_, A_, start, end, g1, g2, g3, g4, g5, g6, theta_=0.0):
         
         sp.init_printing()
         
@@ -54,8 +54,8 @@ class Element:
         T = self.T(c, s)
         symbolic_ke_global = self.symbolic_ke(T, symbolic_ke_local)
         
-        ke_global = self.calculate_ke(symbolic_ke_global, I_, A_, E_, self.L, theta_, I, E, A, L, theta, q1, q2, q3, q4, q5, q6)
-        print(ke_global)
+        self.ke_global = self.calculate_ke(symbolic_ke_global, I_, A_, E_, self.L, theta_, I, E, A, L, theta, g1, g2, g3, g4, g5, g6)
+        
         
     def create_symbols(self):
         I, E, L, A, theta = sp.symbols(['I', 'E', 'L', 'A', 'theta'])
@@ -108,18 +108,18 @@ class Element:
     def symbolic_ke(self, T, ke_):
         return T.T * ke_ * T
     
-    def calculate_ke(self, ke, I_, A_, E_, L_, theta_, I, E, A, L, theta, q1, q2, q3, q4, q5, q6):
+    def calculate_ke(self, ke, I_, A_, E_, L_, theta_, I, E, A, L, theta, g1, g2, g3, g4, g5, g6):
         """
         Replace symbolic values ​​with numerical values
         """
         theta_ = theta_ *math.pi /180.
         k_element = ke.subs({I: I_, A: A_, E: E_, L: L_, theta: theta_})
         
-        k_element = k_element.row_insert(0, sp.Matrix([[q1, q2, q3, q4, q5, q6]]))
-        k_element = k_element.col_insert(0, sp.Matrix([0, q1, q2, q3, q4, q5, q6]))
+        k_element = k_element.row_insert(0, sp.Matrix([[g1, g2, g3, g4, g5, g6]]))
+        k_element = k_element.col_insert(0, sp.Matrix([0, g1, g2, g3, g4, g5, g6]))
         
         return k_element
     
     
-el = Element(300, 70e3, 40., 0, 200, 1, 2, 3, 4, 5, 6, 30)
+
 
