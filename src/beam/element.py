@@ -50,6 +50,7 @@ class Element:
         
         ##Defined in terms of symbolic variables
         I, E, A, L, theta, c, s = self.create_symbols()
+   
         symbolic_ke_local = self.symbolic_ke_(E, A, I, L)
         T = self.T(c, s)
         symbolic_ke_global = self.symbolic_ke(T, symbolic_ke_local)
@@ -61,6 +62,9 @@ class Element:
         I, E, L, A, theta = sp.symbols(['I', 'E', 'L', 'A', 'theta'])
         c = sp.cos(theta)
         s = sp.sin(theta)
+        
+    
+        
         return I, E, L, A, theta, c, s
   
     def symbolic_ke_(self, E, A, I, L):
@@ -120,6 +124,11 @@ class Element:
         
         return k_element
     
-    
+    def force(S1, S2, S3, S4, S5, S6, S7, S8, S9):
+        F = sp.Matrix([S1, S2, 0, 0, -110e3, 0, S7, S8, 0])
+        return F
 
+    def displace(q1, q2, q3, q4, q5, q6, q7, q8, q9):
+        u = sp.Matrix([0, 0, q3, q4, q5, q6, 0, 0, q9])  
+        return u
 

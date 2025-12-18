@@ -6,6 +6,15 @@ class System:
     def __init__(self, elements: List[Element]):
         self.elements = elements
         self.ke = self.calculate_ke(elements)
+        
+        S1, S2, S3, S4, S5, S6, S7, S8, S9, q1, q2, q3, q4, q5, q6, q7, q8, q9 = self.create_symbols()
+        F = sp.Matrix([S1, S2, 0, 0, -100e3, 0, S7, S8, 0])
+        u = sp.Matrix([0, 0, q3, q4, q5, q6, 0, 0, q9])
+        
+        system = self.ke * u - F
+        result = sp.linsolve(system, (S1, S2, q3, q4, q5, q6, S7, S8, q9))
+        print(result)
+
     
     def calculate_ke(self, elements: list[Element]):
         k_elements = []
@@ -32,10 +41,17 @@ class System:
                     
         return k_struct
 
+    def create_symbols(self):
+        ##Esforços
+        symbols_force = ['S1', 'S2', 'S3', 'S4', 'S5', 'S6', 'S7', 'S8', 'S9']
+        
+        ##Displace
+        symbols_displace = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9']
+        
+        S1, S2, S3, S4, S5, S6, S7, S8, S9 = sp.symbols(symbols_force)
+        q1, q2, q3, q4, q5, q6, q7, q8, q9 = sp.symbols(symbols_displace)
+        
+        return S1, S2, S3, S4, S5, S6, S7, S8, S9, q1, q2, q3, q4, q5, q6, q7, q8, q9
 
         
         
-beam1 = Element(1, 1, 1, 0, 1, 1, 2, 3, 4, 5, 6, 0)
-beam2 = Element(1, 1, 1, 0, 1, 1, 2, 3, 7, 8, 9, 0)
-system = System([beam1, beam2])
-print(system.ke)
