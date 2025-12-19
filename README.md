@@ -26,6 +26,41 @@ Educational **Python** library for beam analysis using the **Finite Element Meth
 
 ---
 
+## ⚙️ Instalação | Installation
+
+**Português**
+
+Como esta é uma biblioteca com fins educacionais, a maneira recomendada de instalá-la é através do `pip` em modo editável, diretamente do código-fonte.
+
+Primeiro, clone o repositório:
+```bash
+# Clone este repositório (substitua pela URL correta)
+$ git clone https://github.com/seu-usuario/beam-FEM.git
+```
+
+Em seguida, navegue até o diretório do projeto e instale as dependências em modo editável:
+```bash
+# Navegue até o diretório
+$ cd beam-FEM
+
+# Instale o pacote em modo editável
+$ pip install -e .
+```
+O modo `-e` (editável) permite que alterações no código-fonte sejam refletidas imediatamente no ambiente Python, o que é ideal para estudo e desenvolvimento.
+
+**English**
+
+As this is an educational library, the recommended way to install it is via `pip` in editable mode, directly from the source code.
+
+First, clone the repository. Then, navigate to the project directory and run the following command to install the package and its dependencies:
+```bash
+$ cd beam-FEM
+$ pip install -e .
+```
+The `-e` (editable) flag is ideal for development and study, as it allows changes in the source code to be immediately available in your Python environment.
+
+---
+
 ## 📊 Sistema de unidades | Unit system
 
 As unidades devem ser **consistentes**:
