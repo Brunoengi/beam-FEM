@@ -168,6 +168,8 @@ R = K_cf · u_f + K_cc · u_c − F_c
 
 <img src="./docs/images/examples/example1.png">
 
+L = 1000cm, E = 21000kN/cm², A = 100cm², I = 8000cm⁴
+
 ```python
 from beam import Element, System, Node
 
