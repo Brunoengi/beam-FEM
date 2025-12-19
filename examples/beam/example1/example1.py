@@ -30,6 +30,10 @@ element_1 = Element(
 )
 
 system = System([element_1])
-
 u, reactions = system.solve()
-print(u, reactions)
+
+print("Deslocamentos globais:")
+print(u)
+
+print("\nReações globais:")
+print(reactions)
