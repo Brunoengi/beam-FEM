@@ -16,7 +16,7 @@ class Element:
     Moment  : kN·cm
     """
 
-    def __init__(self, node_i: Node, node_j: Node, E: float, A: float, I: float):
+    def __init__(self, node_i: Node, node_j: Node, E: float, A: float, I: float, q: float = 0.0):
         sp.init_printing()
 
         self.node_i = node_i
@@ -25,6 +25,8 @@ class Element:
         self.E = E
         self.A = A
         self.I = I
+        self.q = q
+
 
         # ------------------------------------------------------------------
         # Geometry
@@ -54,6 +56,40 @@ class Element:
             E_s, A_s, I_s, L_s, theta_s
         )
 
+
+    def equivalent_nodal_load_local(self) -> sp.Matrix:
+        """
+        Equivalent nodal load vector for a uniformly distributed load q.
+        Local coordinates.
+        """
+        q = self.q
+        L = self.L
+
+        return sp.Matrix([
+            0,
+            q * L / 2,
+            q * L**2 / 12,
+            0,
+            q * L / 2,
+            -q * L**2 / 12
+        ])
+
+    def equivalent_nodal_load_global(self) -> sp.Matrix:
+        """
+        Transform equivalent nodal loads to global coordinates.
+        """
+        I_s, E_s, A_s, L_s, theta_s, c, s = self.create_symbols()
+        T = self.T(c, s)
+
+        f_local = self.equivalent_nodal_load_local()
+
+        # substitui c e s pelos valores reais
+        T_num = T.subs({
+            c: math.cos(self.theta),
+            s: math.sin(self.theta)
+        })
+
+        return T_num.T * f_local
     # ------------------------------------------------------------------
     # Geometry helpers
     # ------------------------------------------------------------------

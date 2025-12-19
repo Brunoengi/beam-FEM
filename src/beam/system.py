@@ -1,5 +1,6 @@
 from typing import List
 import sympy as sp
+import math
 
 from .element import Element
 from .node import Node
@@ -60,16 +61,21 @@ class System:
     def assemble_force_vector(self) -> sp.Matrix:
         F = sp.Matrix.zeros(self.ndof, 1)
 
+        # Forças nodais diretas
         for node in self.nodes:
-            fx = node.actions.get("fx", 0)
-            fy = node.actions.get("fy", 0)
-            mz = node.actions.get("mz", 0)
-
             dofs = [d - 1 for d in node.dofs]
 
-            F[dofs[0]] += fx
-            F[dofs[1]] += fy
-            F[dofs[2]] += mz
+            F[dofs[0]] += node.actions.get("fx", 0.0)
+            F[dofs[1]] += node.actions.get("fy", 0.0)
+            F[dofs[2]] += node.actions.get("mz", 0.0)
+
+        # Cargas distribuídas dos elementos
+        for el in self.elements:
+            fe = el.equivalent_nodal_load_global()
+            dofs = [d - 1 for d in el.dofs]
+
+            for i in range(6):
+                F[dofs[i]] += fe[i]
 
         return F
 
