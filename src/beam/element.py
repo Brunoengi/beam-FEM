@@ -1,127 +1,126 @@
-import sympy as sp
 import math
+import sympy as sp
+from .node import Node
+
 
 class Element:
     """
-    Beam element for structural analysis using the Finite Element Method (FEM).
+    2D Euler–Bernoulli beam element with 6 DOFs (ux, uy, rz at each node).
 
-    This class represents a 1D Euler–Bernoulli beam element with constant
-    mechanical and geometric properties.
-
-    Parameters
-    ----------
-    I : float
-        Second moment of area  
-        Unit: cm⁴
-    E : float
-        Young's modulus  
-        Unit: kN/cm²
-    A : float
-        Cross-sectional area  
-        Unit: cm²
-    start : float
-        Initial coordinate of the element along the local x-axis  
-        Unit: cm
-    end : float
-        Final coordinate of the element along the local x-axis  
-        Unit: cm
-    theta: float
-        Unit: Graus
-
-    Notes
-    -----
-    - All input values **must strictly follow** the unit system:
-        Length → cm  
-        Area → cm²  
-        Second moment of area → cm⁴  
-        Stress / modulus → kN/cm²
+    Units (must be consistent):
+    ---------------------------
+    Length  : cm
+    Area    : cm²
+    Inertia : cm⁴
+    Force   : kN
+    Moment  : kN·cm
     """
 
-    def __init__(self, I_, E_, A_, start, end, g1, g2, g3, g4, g5, g6, theta_=0.0):
-        
+    def __init__(self, node_i: Node, node_j: Node, E: float, A: float, I: float):
         sp.init_printing()
-        
-        self.I = I_
-        self.E = E_
-        self.A = A_
-        self.start = start
-        self.end = end
-        self.L = end - start
-        
-        ##Defined in terms of symbolic variables
-        I, E, A, L, theta, c, s = self.create_symbols()
-   
-        symbolic_ke_local = self.symbolic_ke_(E, A, I, L)
+
+        self.node_i = node_i
+        self.node_j = node_j
+
+        self.E = E
+        self.A = A
+        self.I = I
+
+        # ------------------------------------------------------------------
+        # Geometry
+        # ------------------------------------------------------------------
+        self.L = self._length()
+        self.theta = self._angle()
+
+        # ------------------------------------------------------------------
+        # Global DOFs (connectivity)
+        # ------------------------------------------------------------------
+        self.dofs = (
+            *self.node_i.dofs,
+            *self.node_j.dofs
+        )
+
+        # ------------------------------------------------------------------
+        # Symbolic formulation
+        # ------------------------------------------------------------------
+        E_s, A_s, I_s, L_s, theta_s, c, s = self.create_symbols()
+
+        ke_local = self.symbolic_ke_(E_s, A_s, I_s, L_s)
         T = self.T(c, s)
-        symbolic_ke_global = self.symbolic_ke(T, symbolic_ke_local)
-        
-        self.ke_global = self.calculate_ke(symbolic_ke_global, I_, A_, E_, self.L, theta_, I, E, A, L, theta, g1, g2, g3, g4, g5, g6)
-        
-        
+        ke_global_symbolic = self.symbolic_ke(T, ke_local)
+
+        self.ke_global = self.calculate_ke(
+            ke_global_symbolic,
+            E_s, A_s, I_s, L_s, theta_s
+        )
+
+    # ------------------------------------------------------------------
+    # Geometry helpers
+    # ------------------------------------------------------------------
+
+    def _length(self) -> float:
+        dx = self.node_j.x - self.node_i.x
+        dy = self.node_j.y - self.node_i.y
+        return math.sqrt(dx ** 2 + dy ** 2)
+
+    def _angle(self) -> float:
+        dx = self.node_j.x - self.node_i.x
+        dy = self.node_j.y - self.node_i.y
+        return math.atan2(dy, dx)
+
+    # ------------------------------------------------------------------
+    # Symbolic helpers
+    # ------------------------------------------------------------------
+
     def create_symbols(self):
-        I, E, L, A, theta = sp.symbols(['I', 'E', 'L', 'A', 'theta'])
+        """
+        Create symbolic variables for stiffness derivation.
+        """
+        E, A, I, L, theta = sp.symbols("E A I L theta")
         c = sp.cos(theta)
         s = sp.sin(theta)
-        
-    
-        
-        return I, E, L, A, theta, c, s
-  
+        return E, A, I, L, theta, c, s
+
     def symbolic_ke_(self, E, A, I, L):
         """
-        Computes the local stiffness matrix of a beam element
-        based on Euler–Bernoulli beam theory. The element has 6 degrees of freedom.
-
-        Parameters
-        ----------
-        E : float
-            Young's modulus of the material.
-        A : float
-            Cross-sectional area.
-        I : float
-            Second moment of area.
-        L : float
-            Element length.
-
-        Returns
-        -------
-        ke : sympy.Matrix
-            Local stiffness matrix (6x6) in the element coordinate system.
+        Local stiffness matrix (Euler–Bernoulli beam).
         """
-        ke_ = sp.Matrix([
-            [E * A / L, 0, 0, -E*A/L, 0, 0],
-            [0, 12 *E * I / L ** 3, 6 * E * I / L ** 2, 0, -12 * E * I / L ** 3, 6 * E * I / L ** 2],
-            [0, 6 * E * I / L ** 2, 4 * E * I / L, 0, -6 * E * I / L ** 2, 2 * E * I / L],
-            [-E * A / L, 0, 0, E * A / L, 0, 0],
-            [0, -12 * E * I / L ** 3, -6 * E * I / L ** 2, 0, 12 * E * I / L ** 3, -6 * E * I / L ** 2],
-            [0, 6 * E * I / L ** 2, 2 * E * I / L, 0, -6 * E * I / L ** 2, 4 * E * I / L]
+        return sp.Matrix([
+            [ E*A/L,            0,              0, -E*A/L,            0,              0],
+            [     0,  12*E*I/L**3,  6*E*I/L**2,       0, -12*E*I/L**3,  6*E*I/L**2],
+            [     0,   6*E*I/L**2,    4*E*I/L,       0,  -6*E*I/L**2,    2*E*I/L],
+            [-E*A/L,            0,              0,  E*A/L,            0,              0],
+            [     0, -12*E*I/L**3, -6*E*I/L**2,       0,  12*E*I/L**3, -6*E*I/L**2],
+            [     0,   6*E*I/L**2,    2*E*I/L,       0,  -6*E*I/L**2,    4*E*I/L],
         ])
-        return ke_
-    
-    def T(self, c, s):
-        T = sp.Matrix([
-            [c, -s, 0, 0, 0, 0],
-            [s, c, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0],
-            [0, 0, 0, c, -s, 0],
-            [0, 0, 0, s, c, 0],
-            [0, 0, 0, 0, 0, 1]  
-        ]).T
-        return T
-    
-    def symbolic_ke(self, T, ke_):
-        return T.T * ke_ * T
-    
-    def calculate_ke(self, ke, I_, A_, E_, L_, theta_, I, E, A, L, theta, g1, g2, g3, g4, g5, g6):
-        """
-        Replace symbolic values ​​with numerical values
-        """
-        theta_ = theta_ *math.pi /180.
-        k_element = ke.subs({I: I_, A: A_, E: E_, L: L_, theta: theta_})
-        
-        k_element = k_element.row_insert(0, sp.Matrix([[g1, g2, g3, g4, g5, g6]]))
-        k_element = k_element.col_insert(0, sp.Matrix([0, g1, g2, g3, g4, g5, g6]))
-        
-        return k_element
-    
 
+    def T(self, c, s):
+        """
+        Transformation matrix (local → global).
+        """
+        return sp.Matrix([
+            [ c, -s, 0,  0,  0, 0],
+            [ s,  c, 0,  0,  0, 0],
+            [ 0,  0, 1,  0,  0, 0],
+            [ 0,  0, 0,  c, -s, 0],
+            [ 0,  0, 0,  s,  c, 0],
+            [ 0,  0, 0,  0,  0, 1],
+        ])
+
+    def symbolic_ke(self, T, ke_local):
+        """
+        Global stiffness matrix (symbolic).
+        """
+        return T.T * ke_local * T
+
+    def calculate_ke(self, ke, E, A, I, L, theta):
+        """
+        Substitute numerical values into symbolic stiffness matrix.
+        """
+        return ke.subs({
+            E: self.E,
+            A: self.A,
+            I: self.I,
+            L: self.L,
+            theta: self.theta
+        })
