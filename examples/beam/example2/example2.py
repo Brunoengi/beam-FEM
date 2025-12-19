@@ -5,7 +5,7 @@ node_1 = Node(
     label="N1",
     actions={"fx": 0.0, "fy": 0.0, "mz": 0.0},
     displacements={
-        "ux": 0.0,   # 🔑 REMOVE modo rígido
+        "ux": 0.0, 
         "uy": 0.0,
         "rz": None
     }
