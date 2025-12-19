@@ -243,9 +243,6 @@ u, reactions = system.solve()
 print(u, reactions)
 ```
 
-
-## 📌 Exemplo completo 2 | Full example
-
 <img src="./docs/images/examples/example2.png">
 
 L = 1000cm, E = 21000kN/cm², A = 100cm², I = 8000cm⁴
