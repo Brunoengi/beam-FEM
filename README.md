@@ -10,7 +10,6 @@ Educational **Python** library for beam analysis using the **Finite Element Meth
 
 **Português**
 
-* Vigas esbeltas (Euler–Bernoulli)
 * Pequenas deformações
 * Material linear elástico
 * Análise estática
@@ -18,7 +17,6 @@ Educational **Python** library for beam analysis using the **Finite Element Meth
 
 **English**
 
-* Slender beams (Euler–Bernoulli)
 * Small deformations
 * Linear elastic material
 * Static analysis
@@ -34,8 +32,7 @@ Como esta é uma biblioteca com fins educacionais, a maneira recomendada de inst
 
 Primeiro, clone o repositório:
 ```bash
-# Clone este repositório (substitua pela URL correta)
-$ git clone https://github.com/seu-usuario/beam-FEM.git
+$ git clone https://github.com/Brunoengi/beam-FEM.git
 ```
 
 Em seguida, navegue até o diretório do projeto e instale as dependências em modo editável:
@@ -54,6 +51,7 @@ As this is an educational library, the recommended way to install it is via `pip
 
 First, clone the repository. Then, navigate to the project directory and run the following command to install the package and its dependencies:
 ```bash
+$ git clone https://github.com/Brunoengi/beam-FEM.git
 $ cd beam-FEM
 $ pip install -e .
 ```
